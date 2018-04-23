@@ -2,6 +2,6 @@
 - name: Test playbook
   hosts: all
 
-tasks:
-  - name: ping
-    ping:
+  tasks:
+    - name: ping
+      ping:
