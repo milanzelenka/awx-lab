@@ -4,6 +4,6 @@
 
   tasks:
     - name: Install/Uninstall package
-    yum:
-      name: {{ package_name }}
-      state: {{ package_state }}
+      yum:
+        name: {{ package_name }}
+        state: {{ package_state }}
