@@ -1,5 +1,6 @@
 - name: Deploy LAB Environment
   hosts: foreman.dc01.cz
+  gather_facts: false
 
   vars:
     ansible_python_interpreter: /usr/bin/python3.9
