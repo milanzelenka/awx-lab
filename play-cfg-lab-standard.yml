@@ -34,14 +34,16 @@
         owner: root
         group: root
         mode: '0644'
-      notify: "Restart cloud-init" 
+      notify:
+        - Restart cloud-init
 
     - name: Manage cloud-init manage_etc_hosts
       ansible.builtin.lineinfile:
         path: /etc/cloud/cloud.cfg
         regex: '- update_etc_hosts'
         state: absent
-      notify: "Restart cloud-init" 
+      notify:
+        - Restart cloud-init
 
     - name: Manage ssh
       ansible.builtin.copy:
