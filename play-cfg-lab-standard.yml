@@ -1,0 +1,86 @@
+- name: LAB Standard Configuration
+  hosts: all
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Reset root password
+      ansible.builtin.user:
+        user: root
+        password: "{{ root_password | password_hash('sha512') }}"
+      tags:
+        - pw_reset
+
+    - name: Manage admin user
+      ansible.builtin.user:
+        user: admin
+        password: "{{ root_password | password_hash('sha512') }}"
+      tags:
+        - pw_reset
+
+    - name: Manage admin sudo rule
+      ansible.builtin.copy:
+        dest: /etc/sudoers.d/admin
+        content: 'admin ALL=(ALL) NOPASSWD: ALL'
+        owner: root
+        group: root
+        mode: '0400'
+
+    - name: Manage cloud-init pwauth
+      ansible.builtin.copy:
+        dest: /etc/cloud/cloud.cfg.d/01-pwauth.cfg
+        content: 'ssh_pwauth: true'
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Restart cloud-init 
+
+    - name: Manage cloud-init manage_etc_hosts
+      ansible.builtin.lineinfile:
+        path: /etc/cloud/cloud.cfg
+        regex: '- update_etc_hosts'
+        state: absent
+      notify: Restart cloud-init 
+
+    - name: Manage ssh
+      ansible.builtin.copy:
+        dest: /etc/ssh/sshd_config.d/01-lab.conf
+        content: |
+           PasswordAuthentication yes
+           PermitRootLogin {{ 'yes' if permit_root_login | default(false) | bool else 'prohibit-password' }}
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Restart sshd
+
+    - name: Remove anaconda sshd config
+      ansible.builtin.file:
+        path: /etc/ssh/sshd_config.d/01-permitrootlogin.conf
+        state: absent
+
+    - name: Manage /etc/hosts
+      ansible.builtin.copy:
+        dest: /etc/hosts
+        content: |
+            127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+            ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Manage base packages
+      ansible.builtin.dnf:
+        name: {{ base_packages }}
+        state: present
+      when: base_packages | length > 0
+
+  handlers:
+    - name: Restart sshd
+      ansible.builtin.service:
+        name: sshd
+        state: restarted
+
+    - name: Restart cloud-init
+      ansible.builtin.service:
+        name: cloud-init
+        state: restarted
