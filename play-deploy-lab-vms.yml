@@ -1,0 +1,54 @@
+- name: Deploy LAB Environment
+  hosts: foreman.dc01.cz
+
+  vars:
+    ansible_python_interpreter: /usr/bin/python3.9
+
+  tasks:
+    - name: Clone VM from template
+      community.general.proxmox_kvm:
+        node: "{{ vm_template_node }}"
+        api_token_id: "{{ proxmox_api.token_id }}"
+        api_token_secret: "{{ proxmox_api.token_secret }}"
+        api_host: "{{ proxmox_api.host }}"
+        api_user: "{{ proxmox_api.user }}"
+        clone: "{{ vm_template_name }}"
+        full: false
+        format: unspecified
+        target: "{{ vm.node }}"
+        name: "{{ vm.name }}.{{ vm.domain }}"
+        vcpus: "{{ vm.vcpus }}"
+      loop: "{{ vms }}"
+
+    - name: Update VM parameters
+      community.general.proxmox_kvm:
+        node: "{{ vm.node }}"
+        api_token_id: "{{ proxmox_api.token_id }}"
+        api_token_secret: "{{ proxmox_api.token_secret }}"
+        api_host: "{{ proxmox_api.host }}"
+        api_user: "{{ proxmox_api.user }}"
+        name: "{{ vm.name }}.{{ vm.domain }}"
+        state: present
+        update: true
+        ide:
+          ide2: "{{ vm_storage}}:cloudinit,format=qcow2"
+        ciuser: "{{ cloudinit_user }}"
+        sshkeys: "{{ cloudinit_sshkey }}"
+        searchdomains: "{{ vm.domain }}"
+        nameservers: "{{ vm.ns }}"
+        net:
+          net0: "virtio,bridge=vmbr0,tag={{ vm.vlan }}"
+        ipconfig:
+          ipconfig0: "ip={{ vm.ip }},gw={{ vm.gw }}"
+      loop: "{{ vms }}"
+
+    - name: Start VM
+      community.general.proxmox_kvm:
+        node: "{{ vm.node }}"
+        api_token_id: "{{ proxmox_api.token_id }}"
+        api_token_secret: "{{ proxmox_api.token_secret }}"
+        api_host: "{{ proxmox_api.host }}"
+        api_user: "{{ proxmox_api.user }}"
+        name: "{{ vm.name }}.{{ vm.domain }}"
+        state: started
+      loop: "{{ vms }}"
