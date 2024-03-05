@@ -1,0 +1,9 @@
+---
+- name: Install/Uninstall specified package
+  hosts: all
+
+  tasks:
+    - name: Install/Uninstall package
+      ansible.builtin.dnf:
+        name: "{{ package_name | mandatory }}"
+        state: "{{ package_state | default(omit) }}"

@@ -31,7 +31,7 @@
         state: present
         update: true
         ide:
-          ide2: "{{ vm_storage}}:cloudinit,format=qcow2"
+          ide2: "{{ vm_storage }}:cloudinit,format=qcow2"
         ciuser: "{{ cloudinit_user }}"
         sshkeys: "{{ cloudinit_sshkey }}"
         searchdomains: "{{ vm.domain }}"
