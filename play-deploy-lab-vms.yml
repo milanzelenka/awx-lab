@@ -16,7 +16,7 @@
         fail_msg: "Verification failed. Check if tenant is number between 0 and 10 and vms key is defined."
       tags:
         - verify
-    
+
     - name: Clone VM from template
       community.general.proxmox_kvm:
         node: "{{ vm_template_node }}"
