@@ -6,6 +6,17 @@
     ansible_python_interpreter: /usr/bin/python3.9
 
   tasks:
+    - name: Validate data
+      ansible.builtin.assert:
+        that:
+          - tenant is defined
+          - tenant >= 0 and tenant < 10
+          - vms is defined
+        success_msg: "All input data are successfully verified..."
+        fail_msg: "Verification failed. Check if tenant is number between 0 and 10 and vms key is defined."
+      tags:
+        - verify
+    
     - name: Clone VM from template
       community.general.proxmox_kvm:
         node: "{{ vm_template_node }}"
