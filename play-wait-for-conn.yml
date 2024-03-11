@@ -1,6 +1,8 @@
 ---
 - name: Wait for host connection
   hosts: all
+  gather_facts: false
+
   tasks:
     - name: Waiting for host to become reachable
       ansible.builtin.wait_for_connection:
