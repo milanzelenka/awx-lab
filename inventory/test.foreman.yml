@@ -23,8 +23,8 @@ want_subnet: false
 want_subnet_v6: false
 
 
-#cache: true
-#cache_plugin: jsonfile
-#cache_connection: ./tmp/cache/
-#cache_timeout: 86400 # 1d
+cache: true
+cache_plugin: jsonfile
+cache_connection: ./cache/
+cache_timeout: 86400 # 1d
 
